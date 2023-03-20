@@ -149,7 +149,12 @@ class EmployeeController extends MainController
             return $this->noDataFound();
         }
 
-        print_r($empDetails);
+        foreach ($empDetails as $key => $emp) {
+            $empAddresses = $this->findEmployeeAddresses($emp['id']);
+            $empDetails[$key]['addresses'] = $empAddresses;
+            $empContactnos = $this->findEmployeeContactnos($emp['id']);
+            $empDetails[$key]['contactnos'] = $empContactnos;
+        }
 
         $response['status_code'] = 'HTTP/1.1 200 Ok';
         $response['body'] = json_encode([
@@ -165,24 +170,11 @@ class EmployeeController extends MainController
         if (!$empDetails) {
             return $this->noDataFound();
         }
-        $empAddresses = $this->employeeAddress->find($this->empId);
-        if (false === empty($empAddresses)) {
-            $addr = 1;
-            foreach ($empAddresses as $val) {
-                $empDetails['addresses']['address' . $addr] = $val['address'];
-                $addr++;
-            }
-        }
 
-        $empContactnos = $this->employeeContact->find($this->empId);
-        if (false === empty($empContactnos)) {
-            $cnt = 1;
-            foreach ($empContactnos as $val) {
-                $empDetails['contactnos']['contactno' . $cnt] =
-                    $val['contactno'];
-                $cnt++;
-            }
-        }
+        $empAddresses = $this->findEmployeeAddresses($empDetails['id']);
+        $empDetails['addresses'] = $empAddresses;
+        $empContactnos = $this->findEmployeeContactnos($empDetails['id']);
+        $empDetails['contactnos'] = $empContactnos;
 
         $response['status_code'] = 'HTTP/1.1 200 Ok';
         $response['body'] = json_encode([
@@ -190,6 +182,34 @@ class EmployeeController extends MainController
         ]);
 
         return $response;
+    }
+
+    private function findEmployeeAddresses(int $empId)
+    {
+        $empAddresses = $this->employeeAddress->find($empId);
+        $empAddrDetails = [];
+        if (false === empty($empAddresses)) {
+            $cnt = 1;
+            foreach ($empAddresses as $val) {
+                $empAddrDetails['address' . $cnt] = $val['address'];
+                $cnt++;
+            }
+        }
+        return $empAddrDetails;
+    }
+
+    private function findEmployeeContactnos(int $empId)
+    {
+        $empContactnos = $this->employeeContact->find($empId);
+        $empContactDetails = [];
+        if (false === empty($empContactnos)) {
+            $cnt = 1;
+            foreach ($empContactnos as $val) {
+                $empContactDetails['contactno' . $cnt] = $val['contactno'];
+                $cnt++;
+            }
+        }
+        return $empContactDetails;
     }
 
     private function addEmployeeAddresses(int $empId)
@@ -262,7 +282,6 @@ class EmployeeController extends MainController
             file_get_contents('php://input'),
             true
         );
-
         return $requestData;
     }
 

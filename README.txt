@@ -268,26 +268,40 @@ eg.
 Input: 
 URL : http://localhost/webapi/employee/
 
-search : Mumbai
+search : Pune
 
 Output:
 {
     "data": [
         {
-            "id": 23,
+            "id": 26,
             "firstname": "Chetan",
-            "lastname": "Shelke",
+            "lastname": "S",
             "department": "IT",
-            "address": "Mumbai",
-            "contactno": "213122313"
+            "addresses": {
+                "address1": "Solapur,Maharashtra",
+                "address2": "Pune,Mumbai"
+            },
+            "contactnos": {
+                "contactno1": "213122313",
+                "contactno2": "212313131",
+                "contactno3": "123234434"
+            }
         },
         {
-            "id": 24,
+            "id": 27,
             "firstname": "ABC",
             "lastname": "EFG",
             "department": "IT",
-            "address": "Mumbai,Maharashtra",
-            "contactno": "123111112"
+            "addresses": {
+                "address1": "Nashik,Maharashtra",
+                "address2": "Pune,Mumbai"
+            },
+            "contactnos": {
+                "contactno1": "213122313",
+                "contactno2": "212313131",
+                "contactno3": "123234434"
+            }
         }
     ]
 }

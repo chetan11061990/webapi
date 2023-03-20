@@ -39,7 +39,7 @@ class EmployeeTable
     {
         $statement = "
             SELECT 
-                e.id,e.firstname,e.lastname,d.name as department,ea.address,ec.contactno
+                DISTINCT(e.id),e.firstname,e.lastname,d.name as department
             FROM
                 public.employee e 
                 INNER JOIN public.department d ON d.id = e.deptid
