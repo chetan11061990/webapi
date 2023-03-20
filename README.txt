@@ -58,6 +58,7 @@ CREATE TABLE public.employee_contactno(
 
 
 ------------------API-------------------------
+
 Departments :
 i. Create
 URL : http://localhost/webapi/department/
@@ -199,12 +200,12 @@ Response:
 
 
 iii.View:
-URL : http://localhost/webapi/employee/{empId}/
+URL : http://localhost/webapi/employee/
 
 METHOD : GET 
 
 Request Params:
-	empId // Needs to be added in URL
+	empId
 
 Response: 
 	i. Success
@@ -241,3 +242,55 @@ Output:
         }
     }
 }
+
+iv.Search : 
+URL : http://localhost/webapi/employee/
+
+METHOD : GET 
+
+Request Params:
+	search
+
+Response: 
+	i. Success
+	status_code : HTTP/1.1 200 OK
+	body : 'data' => {employee data},
+
+	ii. Validation error
+	status_code : 422 Invalid Entity
+	body : 'error' => Invalid Input
+
+	iii.No data Found
+	status_code : HTTP/1.1 200 OK
+	body : 'error' => 'No Data found',
+
+eg.
+Input: 
+URL : http://localhost/webapi/employee/
+
+search : Mumbai
+
+Output:
+{
+    "data": [
+        {
+            "id": 23,
+            "firstname": "Chetan",
+            "lastname": "Shelke",
+            "department": "IT",
+            "address": "Mumbai",
+            "contactno": "213122313"
+        },
+        {
+            "id": 24,
+            "firstname": "ABC",
+            "lastname": "EFG",
+            "department": "IT",
+            "address": "Mumbai,Maharashtra",
+            "contactno": "123111112"
+        }
+    ]
+}
+
+For Invalid URL which is not related to department or employee
+Error : 404 Not Found

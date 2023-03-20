@@ -51,7 +51,7 @@ class DepartmentController extends MainController
 
     protected function validateInput($requestData)
     {
-        if (!isset($requestData['department'])) {
+        if (true === empty($requestData['department'])) {
             return false;
         }
         return true;

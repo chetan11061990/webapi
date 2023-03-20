@@ -3,6 +3,7 @@ namespace Src\Controller;
 use Src\Table\EmployeeTable;
 use Src\Table\EmployeeAddressesTable;
 use Src\Table\EmployeeContactnoTable;
+use Src\Table\DepartmentTable;
 use Src\Controller\MainController;
 
 class EmployeeController extends MainController
@@ -25,6 +26,7 @@ class EmployeeController extends MainController
         $this->employee = new EmployeeTable($dbconnection);
         $this->employeeAddress = new EmployeeAddressesTable($dbconnection);
         $this->employeeContact = new EmployeeContactnoTable($dbconnection);
+        $this->department = new DepartmentTable($dbconnection);
     }
 
     public function processRequests()
@@ -35,22 +37,32 @@ class EmployeeController extends MainController
                 $response = $this->addEmployeeDetails();
                 break;
             case 'GET':
-                if (true === empty($this->empId)) {
-                    return $this->unprocessableResponse('EmpID is missing');
+                $reqData = $this->getRequestData();
+
+                if (false === empty($reqData['empId'])) {
+                    $this->empId = (int) $reqData['empId'];
+                    $response = $this->findEmployee();
+                } elseif (false === empty($reqData['search'])) {
+                    $searchText = filter_var(
+                        $reqData['search'],
+                        FILTER_SANITIZE_STRING
+                    );
+                    $response = $this->searchEmployees($searchText);
+                } else {
+                    return $this->unprocessableResponse('Invalid Input');
                 }
-                $response = $this->findEmployee();
                 break;
             case 'DELETE':
                 if (true === empty($this->empId)) {
                     return $this->unprocessableResponse('EmpID is missing');
                 }
-                $response = $this->removeEmployee($this->empId);
+                $response = $this->removeEmployee();
                 break;
             case 'PUT':
                 if (true === empty($this->empId)) {
                     return $this->unprocessableResponse('EmpID is missing');
                 }
-                $response = $this->updateEmployeeDetails($this->empId);
+                $response = $this->updateEmployeeDetails();
                 break;
             default:
                 return null;
@@ -63,23 +75,23 @@ class EmployeeController extends MainController
 
     private function addEmployeeDetails()
     {
-        try {
-            $lastInsertId = $this->createEmployee();
+        $deptId = $this->department->find($this->empdetails['deptid']);
+        if (true === empty($deptId)) {
+            $this->unprocessableResponse('Department does not exist');
+        }
 
-            if (!$lastInsertId) {
-                throw new Exception('Error while adding employee data');
-            }
+        $lastInsertId = $this->employee->insert($this->empdetails);
 
-            if (false === empty($this->empaddresses)) {
-                $this->addEmployeeAddresses($lastInsertId);
-            }
+        if (!$lastInsertId) {
+            $this->unprocessableResponse('Error while adding employee data');
+        }
 
-            if (false === empty($this->empcontactnos)) {
-                $this->addEmployeeContactno($lastInsertId);
-            }
-        } catch (Exception $e) {
-            $response['status_code'] = 'HTTP/1.1 200 Ok';
-            $response['error'] = $e->getMessage();
+        if (false === empty($this->empaddresses)) {
+            $this->addEmployeeAddresses($lastInsertId);
+        }
+
+        if (false === empty($this->empcontactnos)) {
+            $this->addEmployeeContactno($lastInsertId);
         }
 
         $response['status_code'] = 'HTTP/1.1 200 Ok';
@@ -90,13 +102,21 @@ class EmployeeController extends MainController
         return $response;
     }
 
-    private function updateEmployeeDetails(int $empId)
+    private function updateEmployeeDetails()
     {
+        $empId = (int) $this->empId;
         $result = $this->employee->find($empId);
-        if (!$result) {
+
+        if (true === empty($result)) {
             return $this->noDataFound();
         }
+
         $this->parseInput();
+
+        $deptId = $this->department->find($this->empdetails['deptid']);
+        if (true === empty($deptId)) {
+            $this->unprocessableResponse('Department does not exist');
+        }
 
         $this->employee->update($this->empdetails, $empId);
 
@@ -117,6 +137,23 @@ class EmployeeController extends MainController
         $response['status_code'] = 'HTTP/1.1 200 Ok';
         $response['body'] = json_encode([
             'success' => 'Employee data updated succesfully',
+        ]);
+
+        return $response;
+    }
+
+    private function searchEmployees($searchText)
+    {
+        $empDetails = $this->employee->search($searchText);
+        if (count($empDetails) == 0) {
+            return $this->noDataFound();
+        }
+
+        print_r($empDetails);
+
+        $response['status_code'] = 'HTTP/1.1 200 Ok';
+        $response['body'] = json_encode([
+            'data' => $empDetails,
         ]);
 
         return $response;
@@ -155,12 +192,6 @@ class EmployeeController extends MainController
         return $response;
     }
 
-    private function createEmployee()
-    {
-        $empId = $this->employee->insert($this->empdetails);
-        return $empId;
-    }
-
     private function addEmployeeAddresses(int $empId)
     {
         foreach ($this->empaddresses as $address) {
@@ -175,8 +206,9 @@ class EmployeeController extends MainController
         }
     }
 
-    private function removeEmployee(int $empId)
+    private function removeEmployee()
     {
+        $empId = (int) $this->empId;
         $result = $this->employee->find($empId);
         if (!$result) {
             return $this->noDataFound();
@@ -207,22 +239,7 @@ class EmployeeController extends MainController
 
     private function parseInput()
     {
-        $requestData = $this->setRequestData();
-
-        $requestData = [
-            'firstname' => 'Chhaya',
-            'lastname' => '',
-            'deptid' => 1,
-            'addresses' => [
-                'address1' => 'Pune,Maharashtra',
-                'address2' => 'Kalyan,Maharashtra',
-            ],
-            'contactnos' => [
-                'contactno1' => '121151515',
-                'contactno2' => '123455878',
-                'contactno3' => '124455878',
-            ],
-        ];
+        $requestData = $this->getRequestData();
 
         if (!$this->validateInput($requestData)) {
             $this->unprocessableResponse('Invalid Input');
@@ -239,12 +256,13 @@ class EmployeeController extends MainController
                 : null;
     }
 
-    private function setRequestData()
+    private function getRequestData()
     {
         $requestData = (array) json_decode(
             file_get_contents('php://input'),
             true
         );
+
         return $requestData;
     }
 

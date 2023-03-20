@@ -8,29 +8,29 @@ $dotenv->load();
 
 $dbconnection = DatabaseConnector::getConnection();
 
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE');
-header('Access-Control-Max-Age: 3600');
-header(
-    'Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
-);
+// header('Access-Control-Allow-Origin: *');
+// header('Content-Type: application/json; charset=UTF-8');
+// header('Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE');
+// header('Access-Control-Max-Age: 3600');
+// header(
+//     'Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
+// );
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = explode('/', $uri);
+// $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// $uri = explode('/', $uri);
 
-$section = $uri[2] ?? null;
+// $section = $uri[2] ?? null;
 
-$empId = null;
-if (false === empty($uri[3])) {
-    $empId = (int) $uri[3];
-}
+// $empId = null;
+// if (false === empty($uri[3])) {
+//     $empId = (int) $uri[3];
+// }
 
-$requestMethod = $_SERVER['REQUEST_METHOD'];
+// $requestMethod = $_SERVER['REQUEST_METHOD'];
 
 /*----Debug Inputs-----*/
 // $requestMethod = 'GET';
-// $empId = 12;
+// $empId = null;
 // $section = 'employee';
 
 switch ($section) {

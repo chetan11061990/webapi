@@ -18,18 +18,46 @@ class EmployeeTable
             FROM
                 public.employee e INNER JOIN 
                 public.department d ON d.id = e.deptid
-            WHERE e.id = ?;
+            WHERE e.id = :empId;
         ";
 
         try {
             $statement = $this->db->prepare($statement);
-            $statement->execute([$id]);
+            $statement->execute(['empId' => $id]);
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
             if ($statement->rowCount() > 0) {
                 return $result[0];
             } else {
                 return [];
             }
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+
+    public function search($searchTxt)
+    {
+        $statement = "
+            SELECT 
+                e.id,e.firstname,e.lastname,d.name as department,ea.address,ec.contactno
+            FROM
+                public.employee e 
+                INNER JOIN public.department d ON d.id = e.deptid
+                LEFT JOIN public.employee_address ea on ea.empid = e.id  
+                LEFT JOIN public.employee_contactno ec on ec.empid  = e.id
+            WHERE e.firstname LIKE :search
+            OR e.lastname LIKE :search
+            OR d.name LIKE :search
+            OR ea.address LIKE :search
+            OR ec.contactno LIKE :search;
+        ";
+
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(['search' => '%' . $searchTxt . '%']);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+            return $result;
         } catch (\PDOException $e) {
             exit($e->getMessage());
         }
