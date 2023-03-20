@@ -1,7 +1,8 @@
 ------------------SOFTWARE REQUIREMENTS--------------
 Programming Language : PHP 8.1
-Server : apache
-Database : postgresql 
+Server : apache2 2.4.52
+Database : postgresql 15.1
+OS : Ubuntu 22.04 LTS
 
 ----------------.env------------------
 Database configuration need to add in .env file 
