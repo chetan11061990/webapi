@@ -8,8 +8,6 @@ $dotenv->load();
 
 $dbconnection = DatabaseConnector::getConnection();
 
-echo 'IN API';
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE');
@@ -23,23 +21,39 @@ $uri = explode('/', $uri);
 
 $section = $uri[2] ?? null;
 
-echo $section;
-
-if (!in_array($section, ['department'])) {
-    header('HTTP/1.1 404 Not Found');
-    exit();
+$empId = null;
+if (false === empty($uri[3])) {
+    $empId = (int) $uri[3];
 }
 
-// $userId = null;
-// if (false === empty($uri[3])) {
-//     $userId = (int) $uri[3];
-// }
+$requestMethod = $_SERVER['REQUEST_METHOD'];
 
-// $requesMethod = $_SERVER['REQUEST_METHOD'];
+/*----Debug Inputs-----
+$requestMethod = 'POST';
+$empId = null;
+$section = 'employee';
+*/
 
-if ($section == 'department') {
-    $section = new Src\Controller\DepartmentController($dbconnection, 'POST');
-    $section->processRequests();
+switch ($section) {
+    case 'department':
+        $section = new Src\Controller\DepartmentController(
+            $dbconnection,
+            $requestMethod
+        );
+        break;
+    case 'employee':
+        $section = new Src\Controller\EmployeeController(
+            $dbconnection,
+            $requestMethod,
+            $empId
+        );
+        break;
+    default:
+        header('HTTP/1.1 404 Not Found');
+        exit();
 }
+
+$section->processRequests();
+?>
 
 ?>

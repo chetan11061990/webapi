@@ -1,8 +1,9 @@
 <?php
 namespace Src\Controller;
 use Src\Table\DepartmentTable;
+use Src\Controller\MainController;
 
-class DepartmentController
+class DepartmentController extends MainController
 {
     private $db;
     private $requestMethod;
@@ -21,12 +22,14 @@ class DepartmentController
         switch ($this->requestMethod) {
             case 'POST':
                 $response = $this->createDepartment();
+                break;
             default:
                 return null;
         }
 
         header($response['status_code']);
         echo $response['body'];
+        exit();
     }
 
     private function createDepartment()
@@ -36,29 +39,22 @@ class DepartmentController
             true
         );
         if (!$this->validateInput($requestData)) {
-            return $this->unprocessableResponse();
+            $this->unprocessableResponse('Invalid Input');
         }
         $this->department->insert($requestData);
         $response['status_code'] = 'HTTP/1.1 201 Created';
-        $response['body'] = null;
+        $response['body'] = json_encode([
+            'success' => 'Department created succesfully',
+        ]);
         return $response;
     }
 
-    private function validateInput($requestData)
+    protected function validateInput($requestData)
     {
         if (!isset($requestData['department'])) {
             return false;
         }
         return true;
-    }
-
-    private function unprocessableResponse()
-    {
-        $response['status_code'] = 'HTTP/1.1 422 Invalid Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input',
-        ]);
-        return $response;
     }
 }
 ?>
