@@ -28,11 +28,10 @@ if (false === empty($uri[3])) {
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
-/*----Debug Inputs-----
-$requestMethod = 'POST';
-$empId = null;
-$section = 'employee';
-*/
+/*----Debug Inputs-----*/
+// $requestMethod = 'GET';
+// $empId = 12;
+// $section = 'employee';
 
 switch ($section) {
     case 'department':
@@ -54,6 +53,5 @@ switch ($section) {
 }
 
 $section->processRequests();
-?>
 
 ?>

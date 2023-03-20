@@ -46,6 +46,26 @@ class EmployeeContactnoTable
             exit($e->getMessage());
         }
     }
+
+    public function find($id)
+    {
+        $statement = "
+            SELECT 
+                contactno
+            FROM
+                public.employee_contactno
+            WHERE empid = :empId;
+        ";
+
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(['empId' => $id]);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result;
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
 }
 
 ?>

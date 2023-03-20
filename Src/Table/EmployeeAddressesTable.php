@@ -46,6 +46,26 @@ class EmployeeAddressesTable
             exit($e->getMessage());
         }
     }
+
+    public function find($id)
+    {
+        $statement = "
+            SELECT 
+                address
+            FROM
+                public.employee_address
+            WHERE empid = :empId;
+        ";
+
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(['empId' => $id]);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result;
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
 }
 
 ?>

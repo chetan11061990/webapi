@@ -25,7 +25,11 @@ class EmployeeTable
             $statement = $this->db->prepare($statement);
             $statement->execute([$id]);
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            return $result;
+            if ($statement->rowCount() > 0) {
+                return $result[0];
+            } else {
+                return [];
+            }
         } catch (\PDOException $e) {
             exit($e->getMessage());
         }

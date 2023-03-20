@@ -3,6 +3,14 @@ Programming Language : PHP 8.1
 Server : apache
 Database : postgresql 
 
+----------------.env------------------
+Database configuration need to add in .env file 
+DB_HOST=
+DB_PORT=
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
+
 
 ---------------DATABASE------------------------
 Postgres
@@ -188,3 +196,48 @@ Response:
 	iii.No data Found
 	status_code : HTTP/1.1 200
 	body : 'error' => 'No Data found',
+
+
+iii.View:
+URL : http://localhost/webapi/employee/{empId}/
+
+METHOD : GET 
+
+Request Params:
+	empId // Needs to be added in URL
+
+Response: 
+	i. Success
+	status_code : HTTP/1.1 200 OK
+	body : 'data' => {employee data},
+
+	ii. Validation error
+	status_code : HTTP/1.1 422 Invalid Entity
+	body : 'error' => Emp Id is missing
+
+	iii.No data Found
+	status_code : HTTP/1.1 200
+	body : 'error' => 'No Data found',
+
+eg.
+Input: 
+URL : http://localhost/webapi/employee/12/
+
+Output:
+{
+    "data": {
+        "id": 12,
+        "firstname": "XYZ",
+        "lastname": "EFG",
+        "department": "IT",
+        "addresses": {
+            "address1": "Pune,Maharashtra",
+            "address2": "Kalyan,Maharashtra"
+        },
+        "contactnos": {
+            "contactno1": "121151515",
+            "contactno2": "123455878",
+            "contactno3": "124455878"
+        }
+    }
+}

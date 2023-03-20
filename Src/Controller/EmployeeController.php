@@ -34,6 +34,12 @@ class EmployeeController extends MainController
                 $this->parseInput();
                 $response = $this->addEmployeeDetails();
                 break;
+            case 'GET':
+                if (true === empty($this->empId)) {
+                    return $this->unprocessableResponse('EmpID is missing');
+                }
+                $response = $this->findEmployee();
+                break;
             case 'DELETE':
                 if (true === empty($this->empId)) {
                     return $this->unprocessableResponse('EmpID is missing');
@@ -116,6 +122,39 @@ class EmployeeController extends MainController
         return $response;
     }
 
+    private function findEmployee()
+    {
+        $empDetails = $this->employee->find($this->empId);
+        if (!$empDetails) {
+            return $this->noDataFound();
+        }
+        $empAddresses = $this->employeeAddress->find($this->empId);
+        if (false === empty($empAddresses)) {
+            $addr = 1;
+            foreach ($empAddresses as $val) {
+                $empDetails['addresses']['address' . $addr] = $val['address'];
+                $addr++;
+            }
+        }
+
+        $empContactnos = $this->employeeContact->find($this->empId);
+        if (false === empty($empContactnos)) {
+            $cnt = 1;
+            foreach ($empContactnos as $val) {
+                $empDetails['contactnos']['contactno' . $cnt] =
+                    $val['contactno'];
+                $cnt++;
+            }
+        }
+
+        $response['status_code'] = 'HTTP/1.1 200 Ok';
+        $response['body'] = json_encode([
+            'data' => $empDetails,
+        ]);
+
+        return $response;
+    }
+
     private function createEmployee()
     {
         $empId = $this->employee->insert($this->empdetails);
@@ -168,10 +207,7 @@ class EmployeeController extends MainController
 
     private function parseInput()
     {
-        // $requestData = (array) json_decode(
-        //     file_get_contents('php://input'),
-        //     true
-        // );
+        $requestData = $this->setRequestData();
 
         $requestData = [
             'firstname' => 'Chhaya',
@@ -201,6 +237,15 @@ class EmployeeController extends MainController
             true === array_key_exists('contactnos', $requestData)
                 ? $requestData['contactnos']
                 : null;
+    }
+
+    private function setRequestData()
+    {
+        $requestData = (array) json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+        return $requestData;
     }
 
     protected function validateInput($requestData)
